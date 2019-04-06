@@ -14,6 +14,7 @@ import 'moment/locale/tr';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FieldHelperText from './FieldHelperText';
+import moment from 'moment';
 
 const AppointmentSchema = Yup.object().shape({
   name: Yup.string()
@@ -35,233 +36,315 @@ const AppointmentSchema = Yup.object().shape({
   )
 });
 
+const initialStateDebug = {
+  name: 'Selim',
+  surname: 'Sevgi',
+  email: 'selim@sevgi.com',
+  phone: '5433334455',
+  selectedPetsSpecies: '',
+  petsName: 'joy',
+  petsBreed: '',
+  selectedAppointmentReasons: [],
+  selectedDateTime: '',
+  appointmentNote: ''
+};
+
+const initialState = {
+  name: '',
+  surname: '',
+  email: '',
+  phone: '',
+  selectedPetsSpecies: '',
+  petsName: '',
+  petsBreed: '',
+  selectedAppointmentReasons: [],
+  selectedDateTime: '',
+  appointmentNote: ''
+};
+
+function getInitialState() {
+  if (process.env.NODE_ENV === 'development') {
+    return initialStateDebug;
+  } else {
+    return initialState;
+  }
+}
+
 class AppointmentForm extends Component {
-  handleSubmit = () => {
-    console.log('Handling');
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      completed: false
+    };
+  }
+
+  handleSubmit = (values, actions) => {
+    console.log('values', values);
+    this.setState({ completed: true });
   };
 
   render() {
     return (
       <Container>
-        <Message
-          icon="paw"
-          attached
-          header="Lovepet Veteriner Kliniği Online Randevu Formu!"
-          content="Formdaki alanları doldurarak randuvu talebinizi oluşturabilirsiniz. Yıldızlı alanların doldurulması zorunludur."
-        />
-        <Formik
-          onSubmit={this.handleSubmit}
-          validationSchema={AppointmentSchema}
-          initialValues={{
-            name: '',
-            surname: '',
-            email: '',
-            phone: '',
-            petsSpecies: '',
-            petsName: '',
-            petsBreed: '',
-            selectedAppointmentReasons: [],
-            selectedDateTime: '',
-            appointmentNote: ''
-          }}
-          render={({
-            values,
-            status,
-            errors,
-            isValid,
-            touched,
-            handleBlur,
-            handleChange,
-            handleSubmit,
-            isSubmitting
-          }) => (
-            <Form className="attached fluid segment" loading={isSubmitting}>
-              <Form.Group widths="equal">
-                <Form.Field required fluid error={touched.name && errors.name}>
-                  <label>Adınız</label>
-                  <input
-                    placeholder="Adınız"
-                    name="name"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    type="text"
-                  />
-                  <FieldHelperText touched={touched.name} error={errors.name} />
-                </Form.Field>
-                <Form.Field
-                  required
-                  fluid
-                  error={touched.surname && errors.surname}
-                >
-                  <label>Soyadınız</label>
-                  <input
-                    placeholder="Soyadınız"
-                    name="surname"
-                    value={values.surname}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    type="text"
-                  />
-                  <FieldHelperText
-                    touched={touched.surname}
-                    error={errors.surname}
-                  />
-                </Form.Field>
-              </Form.Group>
-              <Form.Group widths="equal">
-                <Form.Field
-                  required
-                  fluid
-                  error={touched.email && errors.email}
-                >
-                  <label>Email Adresiniz</label>
-                  <input
-                    placeholder="Email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    type="email"
-                  />
-                  <FieldHelperText
-                    touched={touched.email}
-                    error={errors.email}
-                  />
-                </Form.Field>
-                <Form.Field
-                  required
-                  fluid
-                  error={touched.phone && errors.phone}
-                >
-                  <label>Cep Telefonu Numarınız</label>
-                  <input
-                    placeholder="5xx4445566"
-                    name="phone"
-                    value={values.phone}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    type="text"
-                  />
-                  <FieldHelperText
-                    touched={touched.phone}
-                    error={errors.phone}
-                  />
-                </Form.Field>
-              </Form.Group>
-              <Form.Group widths="equal">
-                <Form.Field
-                  required
-                  fluid
-                  error={touched.petsSpecies && errors.petsSpecies}
-                >
-                  <label>Pet Hayvanınızın Türü</label>
-                  <Dropdown
+        {this.state.completed ? (
+          <Message
+            icon={'check'}
+            attached
+            header="Randevu Talebiniz Başarıyla Alınmıştır!"
+            content="Bizi tercih ettiğiniz için teşekkür ederiz. Randevu talebinize en kısa süre geri dönüş yapılacaktır."
+          />
+        ) : (
+          <React.Fragment>
+            <Message
+              icon={'paw'}
+              attached
+              header="Lovepet Veteriner Kliniği Online Randevu Formu!"
+              content="Formdaki alanları doldurarak randevu talebinizi oluşturabilirsiniz. Yıldızlı alanların doldurulması zorunludur."
+            />
+            <Formik
+              onSubmit={this.handleSubmit}
+              validationSchema={AppointmentSchema}
+              initialValues={getInitialState()}
+              render={({
+                values,
+                status,
+                errors,
+                isValid,
+                touched,
+                handleBlur,
+                handleChange,
+                handleSubmit,
+                isSubmitting,
+                setFieldValue
+              }) => (
+                <Form className="attached fluid segment" loading={isSubmitting}>
+                  <Form.Group widths="equal">
+                    <Form.Field
+                      required
+                      fluid
+                      error={touched.name && errors.name}
+                    >
+                      <label>Adınız</label>
+                      <input
+                        placeholder="Adınız"
+                        name="name"
+                        value={values.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        type="text"
+                      />
+                      <FieldHelperText
+                        touched={touched.name}
+                        error={errors.name}
+                      />
+                    </Form.Field>
+                    <Form.Field
+                      required
+                      fluid
+                      error={touched.surname && errors.surname}
+                    >
+                      <label>Soyadınız</label>
+                      <input
+                        placeholder="Soyadınız"
+                        name="surname"
+                        value={values.surname}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        type="text"
+                      />
+                      <FieldHelperText
+                        touched={touched.surname}
+                        error={errors.surname}
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Field
+                      required
+                      fluid
+                      error={touched.email && errors.email}
+                    >
+                      <label>Email Adresiniz</label>
+                      <input
+                        placeholder="Email"
+                        name="email"
+                        value={values.email}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        type="email"
+                      />
+                      <FieldHelperText
+                        touched={touched.email}
+                        error={errors.email}
+                      />
+                    </Form.Field>
+                    <Form.Field
+                      required
+                      fluid
+                      error={touched.phone && errors.phone}
+                    >
+                      <label>Cep Telefonu Numarınız</label>
+                      <input
+                        placeholder="5xx4445566"
+                        name="phone"
+                        value={values.phone}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        type="text"
+                      />
+                      <FieldHelperText
+                        touched={touched.phone}
+                        error={errors.phone}
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Field
+                      required
+                      fluid
+                      error={
+                        touched.selectedPetsSpecies &&
+                        errors.selectedPetsSpecies
+                      }
+                    >
+                      <label>Pet Hayvanınızın Türü</label>
+                      <Dropdown
+                        fluid
+                        selection
+                        // it does not have name prop
+                        options={petOptions}
+                        placeholder="Pet Hayvanınızın Türünü Seçin"
+                        onChange={(e, { value }) => {
+                          setFieldValue('selectedPetsSpecies', value);
+                        }}
+                      />
+                      <FieldHelperText
+                        touched={touched.selectedPetsSpecies}
+                        error={errors.selectedPetsSpecies}
+                      />
+                    </Form.Field>
+                    <Form.Field
+                      required
+                      fluid
+                      error={
+                        touched.selectedAppointmentReasons &&
+                        errors.selectedAppointmentReasons
+                      }
+                    >
+                      <label>Randevu Talebinizin Neden(ler)i</label>
+                      <Dropdown
+                        selection
+                        multiple
+                        name="selectedAppointmentReasons"
+                        options={appointmentReasons}
+                        placeholder="Randevu Talebinizin Neden(ler)i"
+                        onChange={(e, { value }) => {
+                          setFieldValue('selectedAppointmentReasons', value);
+                        }}
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Field
+                      fluid
+                      error={touched.petsName && errors.petsName}
+                    >
+                      <label>Dostumuzun Adı</label>
+                      <input
+                        placeholder="Dostumuzun Adı"
+                        name="petsName"
+                        value={values.petsName}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        type="text"
+                      />
+                      <FieldHelperText
+                        touched={touched.petsName}
+                        error={errors.petsName}
+                      />
+                    </Form.Field>
+
+                    <Form.Field
+                      fluid
+                      error={touched.petsBreed && errors.petsBreed}
+                    >
+                      <label>Dostumuzun Cinsi</label>
+                      <input
+                        placeholder="Dostumuzun Cinsi"
+                        name="petsBreed"
+                        value={values.petsBreed}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        type="text"
+                      />
+                      <FieldHelperText
+                        touched={touched.petsBreed}
+                        error={errors.petsBreed}
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                  <Form.Field
+                    required
                     fluid
-                    selection
-                    name="default"
-                    options={petOptions}
-                    placeholder="Pet Hayvanınızın Türünü Seçin"
-                    onChange={this.handleChange}
+                    error={touched.selectedDateTime && errors.selectedDateTime}
+                  >
+                    <label>Randevu Günü ve Saati</label>
+                    <DateTimeInput
+                      inline
+                      clearable
+                      closable
+                      localization="tr"
+                      name="selectedDateTime"
+                      placeholder="Randevu Günü ve Saati"
+                      value={values.selectedDateTime}
+                      minDate={moment()}
+                      maxDate={moment().add(1, 'month')}
+                      iconPosition="left"
+                      onChange={(event, { name, value }) => {
+                        setFieldValue(name, value);
+                      }}
+                    />
+                    <FieldHelperText
+                      touched={touched.selectedDateTime}
+                      error={errors.selectedDateTime}
+                    />
+                  </Form.Field>
+                  <Form.Field
+                    fluid
+                    error={touched.appointmentNote && errors.appointmentNote}
+                  >
+                    <label>Randevu Notu</label>
+                    <TextArea
+                      name="appointmentNote"
+                      value={values.appointmentNote}
+                      label="Randevu Açıklaması"
+                      placeholder="Randevu talebiniz ile ilgili notları ve özel istekleri yazabilirsiniz..."
+                      style={{ minHeight: 100 }}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    />
+                    <FieldHelperText
+                      touched={touched.appointmentNote}
+                      error={errors.appointmentNote}
+                    />
+                  </Form.Field>
+                  <Button
+                    color="blue"
+                    disabled={isSubmitting || !isValid}
+                    loading={isSubmitting}
+                    type="submit"
+                    onClick={handleSubmit}
+                    content="Randevuyu Talep Et"
                   />
-                </Form.Field>
-                <Form.Field
-                  required
-                  fluid
-                  error={
-                    touched.selectedAppointmentReasons &&
-                    errors.selectedAppointmentReasons
-                  }
-                >
-                  <label>Randevu Talebinizin Neden(ler)i</label>
-                  <Dropdown
-                    selection
-                    multiple
-                    name="selectedAppointmentReasons"
-                    options={appointmentReasons}
-                    placeholder="Randevu Talebinizin Neden(ler)i"
-                    onChange={this.handleChange}
-                  />
-                </Form.Field>
-              </Form.Group>
-
-              <Form.Group widths="equal">
-                <Form.Field fluid error={touched.petsName && errors.petsName}>
-                  <label>Dostumuzun Adı</label>
-                  <input
-                    placeholder="Dostumuzun Adı"
-                    name="petsName"
-                    value={values.petsName}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    type="text"
-                  />
-                  <FieldHelperText
-                    touched={touched.petsName}
-                    error={errors.petsName}
-                  />
-                </Form.Field>
-
-                <Form.Field fluid error={touched.petsBreed && errors.petsBreed}>
-                  <label>Dostumuzun Cinsi</label>
-                  <input
-                    placeholder="Dostumuzun Cinsi"
-                    name="petsBreed"
-                    value={values.petsBreed}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    type="text"
-                  />
-                  <FieldHelperText
-                    touched={touched.petsBreed}
-                    error={errors.petsBreed}
-                  />
-                </Form.Field>
-              </Form.Group>
-              <Form.Field>
-                <label>Randevu Günü ve Saati</label>
-                <DateTimeInput
-                  localization="tr"
-                  name="dateTime"
-                  placeholder="Randevu Günü ve Saati"
-                  value={''}
-                  iconPosition="left"
-                  //   onChange={this.handleChange}
-                />
-              </Form.Field>
-              <Form.Field
-                fluid
-                error={touched.appointmentNote && errors.appointmentNote}
-              >
-                <label>Randevu Notu</label>
-                <TextArea
-                  name="appointmentNote"
-                  value={values.appointmentNote}
-                  label="Randevu Açıklaması"
-                  placeholder="Randevu talebiniz ile ilgili notları ve özel istekleri yazabilirsiniz..."
-                  style={{ minHeight: 100 }}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-                <FieldHelperText
-                  touched={touched.appointmentNote}
-                  error={errors.appointmentNote}
-                />
-              </Form.Field>
-              <Button
-                color="blue"
-                disabled={isSubmitting || !isValid}
-                loading={isSubmitting}
-                type="submit"
-                onClick={handleSubmit}
-                content="Randevuyu Talep Et"
-              />
-            </Form>
-          )}
-        />
+                </Form>
+              )}
+            />
+          </React.Fragment>
+        )}
         <Message attached="bottom" warning>
           <Icon name="help" />
-          Randevu onayınız tarafınıza email ve sms yoluyla bildirilecektir.
+          Randevu onayınız tarafınıza email veya sms yoluyla bildirilecektir.
         </Message>
       </Container>
     );
