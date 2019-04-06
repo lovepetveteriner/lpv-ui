@@ -1,20 +1,20 @@
 import React, { Component } from 'react';
-import logo from './logo.jpeg';
-import './App.css';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import HomePage from './component/HomePage';
+import 'semantic-ui-css/semantic.min.css';
+import AppointmentForm from './component/AppointmentForm';
+import { routes } from './util/routes';
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <br/>
-          <br/>
-          <p>
-            Yakinda Burada.
-          </p>
-        </header>
-      </div>
+      <Router>
+        <Route path={'/'} exact={true} component={HomePage} />
+        <Route
+          path={routes.REQUEST_AN_APPOINTMENT}
+          component={AppointmentForm}
+        />
+      </Router>
     );
   }
 }
